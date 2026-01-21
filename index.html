@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>På spåret – 30-årsresan</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: rgba(255,255,255,0.06);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.68);
+      --line: rgba(255,255,255,0.12);
+      --ok: #26d07c;
+      --bad: #ff4d6d;
+      --btn: rgba(255,255,255,0.10);
+      --btnHover: rgba(255,255,255,0.16);
+      --shadow: 0 12px 30px rgba(0,0,0,0.35);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 10% 10%, rgba(68, 97, 255, 0.25), transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, rgba(255, 77, 109, 0.18), transparent 60%),
+        radial-gradient(900px 500px at 30% 90%, rgba(38, 208, 124, 0.16), transparent 60%),
+        var(--bg);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+    .wrap { width: min(720px, 100%); }
+    header {
+      display:flex; align-items:flex-start; justify-content:space-between; gap: 12px;
+      margin-bottom: 14px;
+    }
+    .title h1 { margin: 0; font-size: clamp(20px, 4vw, 28px); letter-spacing: 0.2px; }
+    .title p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+    .badge {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      padding: 10px 12px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      font-weight: 700;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .topbar {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .progress {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(68,97,255,0.9), rgba(38,208,124,0.9));
+      border-radius: 999px;
+      transition: width 380ms ease;
+    }
+    .content { padding: 16px; }
+    .kicker {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.2px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .pill {
+      display:inline-flex; align-items:center; gap:6px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.86);
+    }
+    .clue {
+      margin: 12px 0 0;
+      font-size: clamp(16px, 2.3vw, 18px);
+      line-height: 1.55;
+    }
+    .answers {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    button.choice {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: var(--btn);
+      color: var(--text);
+      padding: 14px 14px;
+      border-radius: 14px;
+      font-weight: 750;
+      font-size: 15px;
+      cursor: pointer;
+      text-align: left;
+      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+    button.choice:hover { background: var(--btnHover); transform: translateY(-1px); }
+    button.choice:active { transform: translateY(0px) scale(0.99); }
+    .footer {
+      padding: 14px 16px;
+      border-top: 1px solid var(--line);
+      display:flex; gap: 10px; align-items:center; justify-content:space-between;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .smallbtn {
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.86);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .smallbtn:hover { background: rgba(255,255,255,0.11); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%) translateY(30px);
+      opacity: 0;
+      min-width: min(560px, calc(100% - 24px));
+      background: rgba(10, 12, 20, 0.72);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.92);
+      padding: 12px 14px;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      display:flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      transition: opacity 220ms ease, transform 220ms ease;
+      z-index: 50;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0px); }
+    .toast strong { font-weight: 900; }
+    .toast .hint { color: rgba(255,255,255,0.72); font-size: 13px; margin-top: 2px; }
+    .toast .close {
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.92);
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    /* Shake */
+    .shake { animation: shake 300ms ease; }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-4px); }
+      100% { transform: translateX(0); }
+    }
+
+    /* Confetti (simple) */
+    .confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 60;
+      display: none;
+    }
+    .confetti.show { display: block; }
+    .piece {
+      position: absolute;
+      width: 10px; height: 14px;
+      opacity: 0.9;
+      top: -20px;
+      animation: fall 1400ms linear forwards;
+      border-radius: 3px;
+    }
+    @keyframes fall {
+      to { transform: translateY(calc(100vh + 60px)) rotate(520deg); opacity: 1; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>🚆 På spåret: 30-årsresan</h1>
+        <p>Gissa resmålet. (Spoiler: du får inte ha rätt förrän på sista… 😈)</p>
+      </div>
+      <div class="badge" id="scoreBadge">10 poäng</div>
+    </header>
+
+    <main class="card" id="card">
+      <div class="topbar">
+        <div class="pill" id="qPill">Ledtråd 1/5</div>
+        <div class="progress" aria-label="progress">
+          <div class="bar" id="bar"></div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="kicker">
+          <span class="pill" id="pointsPill">10p</span>
+          <span id="subKicker">Välj ett svar. Du kan alltid prova igen.</span>
+        </div>
+        <p class="clue" id="clueText"></p>
+
+        <div class="answers" id="answers"></div>
+      </div>
+
+      <div class="footer">
+        <span id="triesText">Försök: 0</span>
+        <div style="display:flex; gap:10px;">
+          <button class="smallbtn" id="restartBtn" type="button">Starta om</button>
+          <button class="smallbtn" id="skipBtn" type="button">Nästa ledtråd</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div>
+      <div><strong id="toastTitle">Fel!</strong></div>
+      <div class="hint" id="toastMsg">Prova igen.</div>
+    </div>
+    <button class="close" id="toastClose" type="button">OK</button>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+<script>
+  // ----- Configure your game here -----
+  const game = [
+    {
+      points: 10,
+      clue: "Vår destination är en stad som en gång byggde sin rikedom på att kontrollera en livsviktig vattenväg – och tog betalt av alla som passerade. Ett tidigt exempel på kreativ beskattning.",
+      // ALL answers are wrong (by design)
+      answers: ["Venedig", "Amsterdam", "Hamburg", "Genua"],
+      correct: null,
+      wrongLines: [
+        "Vatten ✔️. Men inte rätt sorts kontrollstation.",
+        "Handel ✔️. Men din passersedel blev inte godkänd.",
+        "Snyggt försök. Du är på helt rätt spår… fast på fel tåg.",
+        "Du anar ett sund… men detta är fel spårvidd."
+      ]
+    },
+    {
+      points: 8,
+      clue: "Här har vetenskapsmän, filosofer och makthavare korsat varandras vägar, ofta över en dryck, medan staden långsamt växte i takt med sitt inflytande.",
+      answers: ["Wien", "Prag", "Paris", "Edinburgh"],
+      correct: null,
+      wrongLines: [
+        "Intellektuellt ✔️. Geografiskt ❌.",
+        "Du tänker rätt… men du tänker fel stad.",
+        "För mycket basker i det svaret.",
+        "Det där svaret luktar mer whisky än rätt."
+      ]
+    },
+    {
+      points: 6,
+      clue: "Design är inte ett yrke här – det är en livsinställning. Till och med vardagliga saker verkar ha gått i designskola.",
+      answers: ["Milano", "Tokyo", "Berlin", "Zürich"],
+      correct: null,
+      wrongLines: [
+        "Mycket stil. Fel adress.",
+        "Otroligt snyggt gissat. Också otroligt fel.",
+        "Du är nära känslan. Långt från målet.",
+        "Här är allt dyrt, men inte rätt dyrt."
+      ]
+    },
+    {
+      points: 4,
+      clue: "På ett ställe här bor man bokstavligen i en frizon, och på ett annat står ett slott där vakter tar sin stillhet på extremt stort allvar.",
+      // fortfarande INGA rätt
+      answers: ["Dublin", "Madrid", "Oslo", "Wien (igen, bara för att)"],
+      correct: null,
+      wrongLines: [
+        "Pubpoäng! Resmålspoäng: 0.",
+        "Soligt, men nej. (Inte ens nästan. Eller… lite. Men nej.)",
+        "Skandinaviskt! Men fel huvudroll.",
+        "Du försöker lösa allt med samma svar. Respekt. Men fel."
+      ]
+    },
+    {
+      points: 2,
+      clue: "Sista chansen. Välj med självförtroende. (Och eventuellt packningslista.)",
+      // ONLY here you can be right:
+      answers: ["Köpenhamn", "Ingenstans"],
+      correct: "Köpenhamn",
+      wrongLines: [
+        "Aj. Den knappen var… modig. Men fel.",
+        "Du valde tomhet. Universum valde att döma dig."
+      ],
+      winTitle: "🎉 RÄTT! PACKA VÄSKAN!",
+      winMsg: "Du fyller 30 — och vi åker till Köpenhamn! 🥂🇩🇰"
+    }
+  ];
+
+  // ----- State -----
+  let q = 0;
+  let tries = 0;
+
+  // ----- Elements -----
+  const clueText = document.getElementById("clueText");
+  const answersEl = document.getElementById("answers");
+  const qPill = document.getElementById("qPill");
+  const pointsPill = document.getElementById("pointsPill");
+  const scoreBadge = document.getElementById("scoreBadge");
+  const triesText = document.getElementById("triesText");
+  const bar = document.getElementById("bar");
+  const toast = document.getElementById("toast");
+  const toastTitle = document.getElementById("toastTitle");
+  const toastMsg = document.getElementById("toastMsg");
+  const toastClose = document.getElementById("toastClose");
+  const card = document.getElementById("card");
+  const restartBtn = document.getElementById("restartBtn");
+  const skipBtn = document.getElementById("skipBtn");
+  const confetti = document.getElementById("confetti");
+
+  function render() {
+    const item = game[q];
+    qPill.textContent = `Ledtråd ${q+1}/5`;
+    pointsPill.textContent = `${item.points}p`;
+    scoreBadge.textContent = `${item.points} poäng`;
+    clueText.textContent = item.clue;
+
+    triesText.textContent = `Försök: ${tries}`;
+    bar.style.width = `${(q / (game.length - 1)) * 100}%`;
+
+    answersEl.innerHTML = "";
+    item.answers.forEach((a, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "choice";
+      btn.type = "button";
+      btn.textContent = a;
+      btn.addEventListener("click", () => pickAnswer(a, idx));
+      answersEl.appendChild(btn);
+    });
+
+    // "Nästa ledtråd" ska finnas men kännas som en fuskknapp
+    skipBtn.textContent = (q < game.length - 1) ? "Nästa ledtråd" : "Se resultat";
+  }
+
+  function pickAnswer(answer, idx) {
+    const item = game[q];
+
+    // All questions except last are impossible to get right.
+    if (q < game.length - 1) {
+      tries++;
+      const line = item.wrongLines[idx % item.wrongLines.length];
+      showToast("❌ Fel!", line + extraWarmth());
+      shakeCard();
+      render();
+      return;
+    }
+
+    // Last question: check correct
+    if (answer === item.correct) {
+      showToast(item.winTitle || "Rätt!", item.winMsg || "Du klarade det!");
+      celebrate();
+      lockUI();
+      return;
+    } else {
+      tries++;
+      const line = item.wrongLines[idx % item.wrongLines.length];
+      showToast("❌ Fel!", line + " …men du får en ny chans 😄");
+      shakeCard();
+      render();
+    }
+  }
+
+  function extraWarmth() {
+    // After a few wrong attempts, add fun “you're close” text
+    if (tries === 2) return " (Du är varm… på fel sätt.)";
+    if (tries === 4) return " (Okej, du hade varit farlig i en gissningslek.)";
+    if (tries === 6) return " (Jag hör hur du muttrar. Fortsätt.)";
+    return "";
+  }
+
+  let toastTimer = null;
+  function showToast(title, msg) {
+    toastTitle.textContent = title;
+    toastMsg.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
+  }
+
+  toastClose.addEventListener("click", () => toast.classList.remove("show"));
+
+  function shakeCard() {
+    card.classList.remove("shake");
+    // force reflow
+    void card.offsetWidth;
+    card.classList.add("shake");
+  }
+
+  function nextClue() {
+    if (q < game.length - 1) {
+      q++;
+      render();
+      showToast("🚦 Nästa!", "Ny ledtråd upplåst. Välj klokt. (Eller inte.)");
+    } else {
+      // On last, do nothing special
+      showToast("👀", "Det är finalen. Välj ett av två öden.");
+    }
+  }
+
+  function restart() {
+    q = 0;
+    tries = 0;
+    confetti.classList.remove("show");
+    confetti.innerHTML = "";
+    unlockUI();
+    render();
+    showToast("🔁 Okej!", "Startat om. Nu tar du den. (Kanske.)");
+  }
+
+  skipBtn.addEventListener("click", nextClue);
+  restartBtn.addEventListener("click", restart);
+
+  function lockUI() {
+    // disable buttons after win
+    [...document.querySelectorAll("button.choice")].forEach(b => b.disabled = true);
+    skipBtn.disabled = true;
+  }
+  function unlockUI() {
+    skipBtn.disabled = false;
+    [...document.querySelectorAll("button.choice")].forEach(b => b.disabled = false);
+  }
+
+  function celebrate() {
+    confetti.classList.add("show");
+    confetti.innerHTML = "";
+    const pieces = 120;
+    for (let i = 0; i < pieces; i++) {
+      const d = document.createElement("div");
+      d.className = "piece";
+      d.style.left = Math.random() * 100 + "vw";
+      d.style.animationDelay = (Math.random() * 450) + "ms";
+      d.style.transform = `translateY(-20px) rotate(${Math.random()*360}deg)`;
+      // random-ish bright colors without libraries
+      const hues = [210, 330, 150, 45, 280, 10];
+      const h = hues[Math.floor(Math.random() * hues.length)];
+      d.style.background = `hsl(${h} 90% 60%)`;
+      d.style.width = (6 + Math.random() * 10) + "px";
+      d.style.height = (8 + Math.random() * 14) + "px";
+      confetti.appendChild(d);
+    }
+    // Expand progress to full
+    bar.style.width = "100%";
+  }
+
+  // init
+  render();
+</script>
+</body>
+</html>
