@@ -1,161 +1,538 @@
 <!doctype html>
 <html lang="sv">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>På spåret – 30-årsresan</title>
-<style>
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  background:#0b1020;
-  color:#fff;
-  display:flex;
-  justify-content:center;
-  padding:20px;
-}
-.app{
-  max-width:600px;
-  width:100%;
-  background:rgba(255,255,255,0.06);
-  border-radius:18px;
-  padding:20px;
-}
-h1{margin-top:0}
-button{
-  width:100%;
-  padding:14px;
-  margin:8px 0;
-  font-size:16px;
-  border-radius:14px;
-  border:none;
-  background:rgba(255,255,255,0.15);
-  color:#fff;
-  cursor:pointer;
-}
-button:hover{background:rgba(255,255,255,0.28)}
-.small{opacity:.7;font-size:14px}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>På spåret – 30-årsresan</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:rgba(255,255,255,0.06);
+      --line:rgba(255,255,255,0.12);
+      --text:rgba(255,255,255,0.92);
+      --muted:rgba(255,255,255,0.68);
+      --btn:rgba(255,255,255,0.12);
+      --btnH:rgba(255,255,255,0.18);
+      --bad:#ff4d6d;
+      --ok:#26d07c;
+      --shadow:0 14px 34px rgba(0,0,0,0.38);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      background:
+        radial-gradient(900px 500px at 10% 10%, rgba(68,97,255,0.25), transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, rgba(255,77,109,0.18), transparent 60%),
+        radial-gradient(900px 500px at 30% 90%, rgba(38,208,124,0.16), transparent 60%),
+        var(--bg);
+      display:grid;
+      place-items:center;
+      padding:16px;
+    }
+    .wrap{width:min(760px,100%)}
+    header{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+      margin-bottom:14px;
+    }
+    h1{margin:0; font-size:clamp(20px,4vw,28px)}
+    .sub{margin:6px 0 0; color:var(--muted); font-size:14px; line-height:1.4}
+    .badge{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,0.05);
+      padding:10px 12px;
+      border-radius:999px;
+      box-shadow:var(--shadow);
+      font-weight:800;
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .topbar{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,0.05);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      color:rgba(255,255,255,0.86);
+      white-space:nowrap;
+    }
+    .progress{
+      width:100%;
+      height:10px;
+      background:rgba(255,255,255,0.08);
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,0.10);
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(68,97,255,0.9), rgba(38,208,124,0.9));
+      border-radius:999px;
+      transition:width 380ms ease;
+    }
+    .content{padding:16px}
+    .kicker{
+      color:var(--muted);
+      font-weight:700;
+      font-size:13px;
+      letter-spacing:0.2px;
+      display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    }
+    .question{
+      margin:12px 0 0;
+      font-size:clamp(16px,2.3vw,18px);
+      line-height:1.55;
+    }
+    .answers{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+    button.choice, button.primary{
+      appearance:none;
+      border:1px solid rgba(255,255,255,0.14);
+      background:var(--btn);
+      color:var(--text);
+      padding:14px 14px;
+      border-radius:14px;
+      font-weight:850;
+      font-size:15px;
+      cursor:pointer;
+      text-align:left;
+      transition:transform 120ms ease, background 120ms ease, border-color 120ms ease, opacity 120ms ease;
+    }
+    button.choice:hover, button.primary:hover{background:var(--btnH); transform:translateY(-1px)}
+    button.choice:active, button.primary:active{transform:translateY(0) scale(0.99)}
+    button.choice[disabled], button.primary[disabled]{opacity:.45; cursor:not-allowed; transform:none}
+    .footer{
+      padding:14px 16px;
+      border-top:1px solid var(--line);
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      color:var(--muted);
+      font-size:13px;
+      flex-wrap:wrap;
+    }
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%) translateY(30px);
+      opacity:0;
+      min-width:min(620px, calc(100% - 24px));
+      background:rgba(10,12,20,0.72);
+      backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,0.14);
+      color:rgba(255,255,255,0.92);
+      padding:12px 14px;
+      border-radius:14px;
+      box-shadow:var(--shadow);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      transition:opacity 220ms ease, transform 220ms ease;
+      z-index:50;
+    }
+    .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+    .toast .close{
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(255,255,255,0.08);
+      color:rgba(255,255,255,0.92);
+      padding:8px 10px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:900;
+    }
+    .shake{animation:shake 320ms ease}
+    @keyframes shake{
+      0%{transform:translateX(0)}
+      25%{transform:translateX(-6px)}
+      50%{transform:translateX(6px)}
+      75%{transform:translateX(-4px)}
+      100%{transform:translateX(0)}
+    }
 
-.toast{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#111;
-  padding:12px 16px;
-  border-radius:12px;
-  display:none;
-}
-</style>
+    /* Free text */
+    .inputRow{
+      margin-top:14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    input[type="text"]{
+      flex:1 1 260px;
+      padding:14px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.16);
+      background:rgba(255,255,255,0.08);
+      color:var(--text);
+      font-size:16px;
+      outline:none;
+    }
+    input[type="text"]::placeholder{color:rgba(255,255,255,0.45)}
+    .hint{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.4;
+    }
+
+    /* Confetti */
+    .confetti{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:60;
+      display:none;
+    }
+    .confetti.show{display:block}
+    .piece{
+      position:absolute;
+      width:10px; height:14px;
+      opacity:0.92;
+      top:-20px;
+      animation:fall 1500ms linear forwards;
+      border-radius:3px;
+    }
+    @keyframes fall{
+      to{transform:translateY(calc(100vh + 60px)) rotate(540deg); opacity:1}
+    }
+  </style>
 </head>
 
 <body>
-<div class="app">
-<h1>🚆 På spåret: 30-årsresan</h1>
-<p class="small" id="progress"></p>
-<p id="clue"></p>
-<div id="answers"></div>
-</div>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>🚆 På spåret: 30-årsresan</h1>
+        <p class="sub">Svarar du rätt går du vidare. Sen blir det ledtrådar… och till sist: gissa resmålet.</p>
+      </div>
+      <div class="badge" id="stageBadge">Startar…</div>
+    </header>
 
-<div class="toast" id="toast"></div>
+    <main class="card" id="card">
+      <div class="topbar">
+        <div class="pill" id="pillLeft">Steg 1/10</div>
+        <div class="progress"><div class="bar" id="bar"></div></div>
+      </div>
+
+      <div class="content" id="content">
+        <!-- injected -->
+      </div>
+
+      <div class="footer">
+        <span id="footerLeft">Tips: Tryck på rätt svar för att gå vidare.</span>
+        <span id="footerRight"></span>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div>
+      <div><strong id="toastTitle">Fel!</strong></div>
+      <div style="color:rgba(255,255,255,0.74); font-size:13px; margin-top:2px" id="toastMsg">Prova igen.</div>
+    </div>
+    <button class="close" id="toastClose" type="button">OK</button>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
 
 <script>
-const game = [
-  // 🔥 NONSENSDEL
-  {
-    clue:"Resmålet valdes efter en mycket vetenskaplig metod: Vilken?",
-    answers:["Ryanair","Booking","Egna önskemål","Rimlighet"]
-  },
-  {
-    clue:"På resmålet är det enligt rykten socialt accepterat att ta en öl innan 10. Var?",
-    answers:["Söder","Göteborg","Vänersborgsgatan 1c","Någon annanstans"]
-  },
-  {
-    clue:"Vi åker en fredag, vilken månad?",
-    answers:["Maj","Mars","Juli","Juni"]
-  },
-  {
-    clue:"Om man frågar lokalbefolkningen om vägen får man oftast:",
-    answers:["Ett svar","Ett leende","Svårbegripligt ljud","Missförstånd"]
-  },
+  // ========= GAME DATA =========
+  // Steps 1-3: MCQ with correct option required
+  // Steps 4-9: 6 clues, only "Nästa"
+  // Step 10: free text answer
+  const steps = [
+    {
+      type: "mcq",
+      title: "Fråga 1",
+      prompt: "Vi ska på resa, vilka följer med?",
+      options: ["Vilma", "Agnes", "Erik", "Agnes, Erik & Vilma"],
+      correctIndex: 3,
+      wrongMsg: "Nästan… men nej. Tänk: hela gänget. 😄"
+    },
+    {
+      type: "mcq",
+      title: "Fråga 2",
+      prompt: "Hur kommer resan bli?",
+      options: ["Tråkig", "Hemsk", "Inställd", "JÄTTEKUL"],
+      correctIndex: 3,
+      wrongMsg: "Ett starkt nej. Testa igen. (Du får poäng för dramatik.)"
+    },
+    {
+      type: "mcq",
+      title: "Fråga 3",
+      prompt: "När reser vi?",
+      options: ["Maj", "Mars", "April", "Juni"],
+      correctIndex: 2,
+      wrongMsg: "Nära-ish… men vi tar den i april-vagnen 🚆"
+    },
 
-  // 🚆 RIKTIGA LEDTRÅDAR (men fortfarande omöjliga)
-  {
-    clue:"Staden byggde sin rikedom på att kontrollera en livsviktig vattenväg och ta betalt av förbipasserande.",
-    answers:["Venedig","Amsterdam","Hamburg","Genua"]
-  },
-  {
-    clue:"Här har idéer, makt och inflytande ofta diskuterats över en dryck.",
-    answers:["Wien","Prag","Paris","Edinburgh"]
-  },
-  {
-    clue:"Design är inte ett yrke – det är en självklar del av vardagen.",
-    answers:["Milano","Tokyo","Berlin","Zürich"]
-  },
-  {
-    clue:"En stad med både slott och en plats som beskriver sig själv som frizon.",
-    answers:["Dublin","Madrid","Oslo","Wien"]
-  },
+    // 6 hard clues (no answering)
+    {
+      type: "clue",
+      title: "Ledtråd 1",
+      prompt: "En stad som länge tjänade pengar på att ha kontroll över en mycket viktig passage i vattnet — ungefär som en gammaldags betalvägg för sjöfart."
+    },
+    {
+      type: "clue",
+      title: "Ledtråd 2",
+      prompt: "Här finns en plats som startade som ett militärt projekt och blev ett av Europas mest kända stadsrum — byggt av lager på lager historia."
+    },
+    {
+      type: "clue",
+      title: "Ledtråd 3",
+      prompt: "Staden har gjort ‘vardag’ till en konstform: möbler, lampor, bestick — allt ser ut som att någon haft en åsikt om exakt allt."
+    },
+    {
+      type: "clue",
+      title: "Ledtråd 4",
+      prompt: "Om du tar dig hit från Sverige kan du göra det utan att kliva av marken särskilt mycket — du ‘glider’ snarare än flyger."
+    },
+    {
+      type: "clue",
+      title: "Ledtråd 5",
+      prompt: "På en viss plats i staden bor man i en frizon med helt egna regler, och det är lika mycket samtalsämne som sevärdhet."
+    },
+    {
+      type: "clue",
+      title: "Ledtråd 6",
+      prompt: "Här kan man fira med bubbel och något nybakat i många lager — och ändå känna sig som en huvudperson i en weekend-film."
+    },
 
-  // 🏁 FINAL
-  {
-    clue:"Sista chansen. Nu räcker det. Vart ska vi?",
-    answers:["Köpenhamn","Ingenstans"],
-    correct:"Köpenhamn"
-  }
-];
-
-let q = 0;
-
-const clueEl = document.getElementById("clue");
-const answersEl = document.getElementById("answers");
-const progressEl = document.getElementById("progress");
-const toast = document.getElementById("toast");
-
-function render(){
-  const item = game[q];
-  progressEl.textContent = `Ledtråd ${q+1}/${game.length}`;
-  clueEl.textContent = item.clue;
-  answersEl.innerHTML = "";
-
-  item.answers.forEach(answer=>{
-    const btn = document.createElement("button");
-    btn.textContent = answer;
-    btn.onclick = ()=>pick(answer);
-    answersEl.appendChild(btn);
-  });
-}
-
-function pick(answer){
-  // FINAL
-  if(q === game.length - 1){
-    if(answer === game[q].correct){
-      showToast("🎉 RÄTT! Packa väskan – vi åker till Köpenhamn 🇩🇰");
-      answersEl.innerHTML = "";
-    } else {
-      showToast("❌ Fel. Dramatiskt fel.");
+    // Final free-text
+    {
+      type: "final",
+      title: "Final",
+      prompt: "Vart är vi på väg?",
+      successTitle: "🎉 RÄTT!",
+      successMsg: "RÄTT! Packa väskan! 3e april går tåget mot Köpenhamn!",
+      // Accept variants (you can remove variants if you ONLY want “Köpenhamn”)
+      accepted: ["köpenhamn", "kopenhamn", "copenhagen"]
     }
-    return;
+  ];
+
+  // ========= STATE =========
+  let idx = 0;
+
+  // ========= ELEMENTS =========
+  const card = document.getElementById("card");
+  const content = document.getElementById("content");
+  const pillLeft = document.getElementById("pillLeft");
+  const stageBadge = document.getElementById("stageBadge");
+  const bar = document.getElementById("bar");
+  const footerRight = document.getElementById("footerRight");
+
+  const toast = document.getElementById("toast");
+  const toastTitle = document.getElementById("toastTitle");
+  const toastMsg = document.getElementById("toastMsg");
+  const toastClose = document.getElementById("toastClose");
+
+  const confetti = document.getElementById("confetti");
+
+  // ========= RENDER =========
+  function render() {
+    const step = steps[idx];
+    const total = steps.length;
+    pillLeft.textContent = `Steg ${idx + 1}/${total}`;
+    bar.style.width = `${(idx / (total - 1)) * 100}%`;
+
+    stageBadge.textContent = step.type === "mcq"
+      ? "Fråga"
+      : step.type === "clue"
+        ? "Ledtråd"
+        : "Final";
+
+    footerRight.textContent = step.type === "clue" ? "Ingen gissning här 😈" : "";
+
+    if (step.type === "mcq") renderMCQ(step);
+    if (step.type === "clue") renderClue(step);
+    if (step.type === "final") renderFinal(step);
   }
 
-  // ALLA ANDRA: alltid fel → vidare
-  showToast("❌ Fel! Vidare…");
-  setTimeout(()=>{
-    q++;
-    render();
-  }, 900);
-}
+  function renderMCQ(step) {
+    content.innerHTML = `
+      <div class="kicker">
+        <span class="pill">${step.title}</span>
+        <span>Välj rätt svar för att gå vidare.</span>
+      </div>
+      <div class="question">${escapeHtml(step.prompt)}</div>
+      <div class="answers" id="answers"></div>
+    `;
 
-function showToast(text){
-  toast.textContent = text;
-  toast.style.display = "block";
-  setTimeout(()=>toast.style.display="none",1200);
-}
+    const answers = document.getElementById("answers");
+    step.options.forEach((opt, i) => {
+      const b = document.createElement("button");
+      b.className = "choice";
+      b.type = "button";
+      b.textContent = opt;
+      b.addEventListener("click", () => {
+        if (i === step.correctIndex) {
+          showToast("✅ Rätt!", "Snyggt. Nästa!");
+          setTimeout(next, 450);
+        } else {
+          showToast("❌ Fel!", step.wrongMsg || "Prova igen.");
+          shake();
+        }
+      });
+      answers.appendChild(b);
+    });
+  }
 
-render();
+  function renderClue(step) {
+    content.innerHTML = `
+      <div class="kicker">
+        <span class="pill">${step.title}</span>
+        <span>Ledtråd (svår). Bara att klicka vidare.</span>
+      </div>
+      <div class="question">${escapeHtml(step.prompt)}</div>
+      <div class="answers" style="margin-top:16px">
+        <button class="primary" type="button" id="nextBtn">Nästa ➜</button>
+      </div>
+      <div class="hint">Tips: Läs högt med “På spåret”-röst för maximal effekt.</div>
+    `;
+    document.getElementById("nextBtn").addEventListener("click", next);
+  }
+
+  function renderFinal(step) {
+    content.innerHTML = `
+      <div class="kicker">
+        <span class="pill">${step.title}</span>
+        <span>Skriv svaret i rutan.</span>
+      </div>
+      <div class="question">${escapeHtml(step.prompt)}</div>
+
+      <div class="inputRow">
+        <input id="answerInput" type="text" placeholder="Skriv här…" autocomplete="off" />
+        <button class="primary" id="submitBtn" type="button">Svara</button>
+      </div>
+
+      <div class="hint">Hint: Du kan skriva med eller utan versaler. 😉</div>
+    `;
+
+    const input = document.getElementById("answerInput");
+    const submit = document.getElementById("submitBtn");
+
+    function submitAnswer() {
+      const raw = (input.value || "").trim();
+      const normalized = normalize(raw);
+
+      const ok = step.accepted.includes(normalized);
+
+      if (ok) {
+        showToast(step.successTitle || "Rätt!", step.successMsg || "Du klarade det!");
+        celebrate();
+        lockFinalUI();
+      } else {
+        showToast("❌ Fel!", "Prova igen… (Det är nära nu.)");
+        shake();
+        input.focus();
+        input.select();
+      }
+    }
+
+    submit.addEventListener("click", submitAnswer);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submitAnswer();
+    });
+
+    input.focus();
+  }
+
+  function lockFinalUI() {
+    const input = document.getElementById("answerInput");
+    const submit = document.getElementById("submitBtn");
+    if (input) input.disabled = true;
+    if (submit) submit.disabled = true;
+    bar.style.width = "100%";
+  }
+
+  // ========= HELPERS =========
+  function next() {
+    if (idx < steps.length - 1) {
+      idx++;
+      render();
+    }
+  }
+
+  function normalize(s) {
+    // Lowercase + remove accents (Köpenhamn -> kopenhamn) + collapse spaces
+    return s
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function shake() {
+    card.classList.remove("shake");
+    void card.offsetWidth;
+    card.classList.add("shake");
+  }
+
+  let toastTimer = null;
+  function showToast(title, msg) {
+    toastTitle.textContent = title;
+    toastMsg.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+  }
+
+  toastClose.addEventListener("click", () => toast.classList.remove("show"));
+
+  function celebrate() {
+    confetti.classList.add("show");
+    confetti.innerHTML = "";
+    const pieces = 140;
+    const hues = [210, 330, 150, 45, 280, 10];
+
+    for (let i = 0; i < pieces; i++) {
+      const d = document.createElement("div");
+      d.className = "piece";
+      d.style.left = Math.random() * 100 + "vw";
+      d.style.animationDelay = (Math.random() * 450) + "ms";
+
+      const h = hues[Math.floor(Math.random() * hues.length)];
+      d.style.background = `hsl(${h} 90% 60%)`;
+      d.style.width = (6 + Math.random() * 10) + "px";
+      d.style.height = (8 + Math.random() * 14) + "px";
+      confetti.appendChild(d);
+    }
+  }
+
+  // ========= INIT =========
+  render();
 </script>
 </body>
 </html>
-
-
-
